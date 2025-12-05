@@ -10,6 +10,7 @@ import {
   signInWithPopup,
   updateProfile,
 } from "firebase/auth";
+import { getFirestore, collection, addDoc } from "firebase/firestore";
 
 /* === Firebase Setup === */
 const firebaseConfig = {
@@ -21,8 +22,9 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
+const db = getFirestore(app);
 const provider = new GoogleAuthProvider();
-const user = auth.currentUser;
+
 /* === UI === */
 
 /* == UI - Elements == */
@@ -45,7 +47,10 @@ const userGreetingEl = document.getElementById("user-greeting");
 
 const displayNameInputEl = document.getElementById("display-name-input");
 const photoURLInputEl = document.getElementById("photo-url-input");
-const updateProfileButtonEl = document.getElementById("update-profile-btn");
+// const updateProfileButtonEl = document.getElementById("update-profile-btn");
+
+const textareaEl = document.getElementById("post-input");
+const postButtonEl = document.getElementById("post-btn");
 
 /* == UI - Event Listeners == */
 
@@ -55,13 +60,35 @@ signInButtonEl.addEventListener("click", authSignInWithEmail);
 createAccountButtonEl.addEventListener("click", authCreateAccountWithEmail);
 const signOutButtonEl = document.getElementById("sign-out-btn");
 signOutButtonEl.addEventListener("click", authSignOut);
-updateProfileButtonEl.addEventListener("click", authUpdateProfile);
+// updateProfileButtonEl.addEventListener("click", authUpdateProfile);
+postButtonEl.addEventListener("click", postButtonPressed);
 
 /* === Main Code === */
 
 showLoggedOutView();
 
 /* === Functions === */
+function postButtonPressed() {
+  const postBody = textareaEl.value;
+
+  if (postBody) {
+    addPostToDB(postBody);
+    clearInputField(textareaEl);
+  }
+}
+
+/* = Functions - Firebase - Cloud Firestore = */
+
+async function addPostToDB(postBody) {
+  try {
+    const docRef = await addDoc(collection(db, "posts"), {
+      body: postBody,
+    });
+    console.log("Document written with ID: ", docRef.id);
+  } catch (error) {
+    console.error(error.message);
+  }
+}
 
 /* = Functions - Firebase - Authentication = */
 
@@ -171,18 +198,18 @@ function showUserGreeting(element, user) {
   }
 }
 
-function authUpdateProfile() {
-  const newDisplayName = displayNameInputEl.value;
-  const newPhotoURL = photoURLInputEl.value;
+// function authUpdateProfile() {
+//   const newDisplayName = displayNameInputEl.value;
+//   const newPhotoURL = photoURLInputEl.value;
 
-  updateProfile(auth.currentUser, {
-    displayName: newDisplayName,
-    photoURL: newPhotoURL,
-  })
-    .then(() => {
-      console.log("Profile updated");
-    })
-    .catch((error) => {
-      console.error(error.message);
-    });
-}
+//   updateProfile(auth.currentUser, {
+//     displayName: newDisplayName,
+//     photoURL: newPhotoURL,
+//   })
+//     .then(() => {
+//       console.log("Profile updated");
+//     })
+//     .catch((error) => {
+//       console.error(error.message);
+//     });
+// }
