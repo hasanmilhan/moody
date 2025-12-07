@@ -70,19 +70,21 @@ showLoggedOutView();
 /* === Functions === */
 function postButtonPressed() {
   const postBody = textareaEl.value;
+  const user = auth.currentUser;
 
   if (postBody) {
-    addPostToDB(postBody);
+    addPostToDB(postBody, user);
     clearInputField(textareaEl);
   }
 }
 
 /* = Functions - Firebase - Cloud Firestore = */
 
-async function addPostToDB(postBody) {
+async function addPostToDB(postBody, user) {
   try {
     const docRef = await addDoc(collection(db, "posts"), {
       body: postBody,
+      uid: user.uid,
     });
     console.log("Document written with ID: ", docRef.id);
   } catch (error) {
